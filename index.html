@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital@1&display=swap');
+  </style>
+</head>
+<body>
+    <img src="./img/Amrita Logo.png" alt="Amrita" class="w-1/5 h-1/4" style="margin-top: 7%;margin-left: 10%;">
+    <img src="./img/anokha_2023_black.png" alt="Anokha" class="w-1/5 h-1/4" style="margin-top: -9%;margin-left: 70%;"><br>
+    <div class="flex items-center justify-center">
+        <img src="./img/KOLLECT LOGO .png" alt="KOLECT" class="w-1/4 h-1/4" style="margin-top: -9%;">
+    </div>
+    <div style="margin-top:-5%">
+        <h1 class="text-center text-6xl font-bold text-black">FirstEver</h1>
+        <h1 class="text-center text-custom font-bold text-black" style="font-size: 80px;font-family: 'Josefin';"><font style="color:aqua"><font style="color: orange;">M</font>eta<font style="color: orange;">V</font>erse</font> Exhibition</h1>
+        <h1 class="text-center text-4xl font-bold text-black">of KOLECTIBLES</h1>
+    </div><br>
+    <div class="fle items-center justify-center">
+        <img src="./img/kqr.png" class="w-1/4" style="margin-left: 37.5%;">
+      </div><br>
+    <button class="mx-auto block bg-transparent hover:bg-brown-600 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" onClick="displayIframe()">Create Avatar</button><br>
+
+    <iframe id="frame" class="w-1/2" allow="camera *; microphone *; clipboard-write" hidden style="margin-left: 25%;height: 200px;"></iframe>
+
+    <script>
+        const subdomain = 'kolect-exhibition'; // Replace with your custom subdomain
+        const frame = document.getElementById('frame');
+
+        frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi`;
+
+        window.addEventListener('message', subscribe);
+        document.addEventListener('message', subscribe);
+
+        function subscribe(event) {
+            const json = parse(event);
+
+            if (json?.source !== 'readyplayerme') {
+                return;
+            }
+
+            // Susbribe to all events sent from Ready Player Me once frame is ready
+            if (json.eventName === 'v1.frame.ready') {
+                frame.contentWindow.postMessage(
+                    JSON.stringify({
+                        target: 'readyplayerme',
+                        type: 'subscribe',
+                        eventName: 'v1.**'
+                    }),
+                    '*'
+                );
+            }
+
+            // Get avatar GLB URL
+            if (json.eventName === 'v1.avatar.exported') {
+                console.log(`Avatar URL: ${json.data.url}`);
+                document.getElementById('avatarUrl').innerHTML = `Avatar URL: ${json.data.url}`;
+                document.getElementById('frame').hidden = true;
+            }
+
+            // Get user id
+            if (json.eventName === 'v1.user.set') {
+                console.log(`User with id ${json.data.id} set: ${JSON.stringify(json)}`);
+            }
+        }
+
+        function parse(event) {
+            try {
+                return JSON.parse(event.data);
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function displayIframe() {
+            document.getElementById('frame').hidden = false;
+        }
+    </script>
+</body>
+</html>
